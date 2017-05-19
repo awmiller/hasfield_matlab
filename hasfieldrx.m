@@ -1,9 +1,9 @@
-function [ x,I ] = hasfield( s, fname, varargin)
-% X = HASFIELD(S,FNAME) checks if the struct S has the fieldname FNAME. If
-% S is not a struct, X will be false.
+function [ x,I ] = hasfieldrx( s, regex, varargin)
+% X = HASFIELDRX(S,REGEX) checks if the struct S has a fieldname matching
+% the regular expression REGEX
 %
-% [X,L] = HASFIELD(S,FNAME,LEVEL) checks LEVEL number of levels into possible
-% nested structres for a field name. L returns the first level that the
+% [X,L] = HASFIELDRX(S,REGEX,LEVEL) checks LEVEL number of levels into possible
+% nested structres for a field name matching REGEX. L returns the first level that the
 % field name was found at.
 
 L = 0;% level
@@ -39,13 +39,15 @@ recurseon({s});
             t = T{i};
             
             %detection
-            x = isfield(t,fname);
+            N = fieldnames(t);
+            x = any(... %is any cell not empty?
+                ~cellfun(@isempty,... %have some cellFUN, cells -> logical ary
+                regexp(N,regex))); %create cell array of match positions, empty=no match
             if(x) 
                 return
             end
             
             %breadth first elaboration
-            N = fieldnames(t);
             for j = 1:length(N)
                 if(isstruct(t.(N{j})))
                     NEWT = vertcat(NEWT,t.(N{j}));
